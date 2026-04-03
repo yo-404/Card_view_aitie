@@ -1,0 +1,2363 @@
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=DM+Mono:wght@400;500&display=swap');
+
+    :root {
+        --p-royal: #5156B1;
+        --p-dark: #47496F;
+        --p-indigo: #545784;
+        --p-muted: #6E7097;
+        --p-pale: #E2E5FF;
+        --p-lavender: #C5C6E6;
+        --p-periwinkle: #9192D7;
+        --p-blush: #F3D5F7;
+        --p-surface: #F7F7FD;
+        --p-border: rgba(81, 86, 132, 0.15);
+        --p-bordermid: rgba(81, 86, 132, 0.28);
+        --p-green: #1a7a4a;
+        --p-green-bg: #e6f9f0;
+        --p-red: #c0392b;
+        --p-red-bg: #fdf0ef;
+    }
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    .root {
+        font-family: 'DM Sans', sans-serif;
+        background: var(--p-surface);
+        padding: 2rem 1.5rem;
+        min-height: 100vh;
+    }
+
+    .shell {
+        max-width: 540px;
+        margin: 0 auto;
+        transition: max-width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .step-track {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 2.5rem;
+    }
+
+    .step-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        flex: 1;
+        position: relative;
+    }
+
+    .step-item::after {
+        content: '';
+        position: absolute;
+        top: 13px;
+        left: calc(50% + 16px);
+        width: calc(100% - 32px);
+        height: 1.5px;
+        background: var(--p-border);
+    }
+
+    .step-item.sdone::after {
+        background: var(--p-royal);
+    }
+
+    .step-item:last-child::after {
+        display: none;
+    }
+
+    .step-dot {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        flex-shrink: 0;
+    }
+
+    .step-dot.done {
+        background: var(--p-royal);
+        color: #fff;
+    }
+
+    .step-dot.active {
+        background: var(--p-pale);
+        color: var(--p-royal);
+        border: 2px solid var(--p-royal);
+    }
+
+    .step-dot.idle {
+        background: #fff;
+        color: var(--p-muted);
+        border: 1px solid var(--p-bordermid);
+        cursor: default;
+    }
+
+    .step-dot.locked {
+        background: #fff;
+        color: var(--p-lavender);
+        border: 1px solid var(--p-border);
+        cursor: default;
+    }
+
+    .step-lbl {
+        font-size: 9px;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        text-align: center;
+        color: var(--p-muted);
+    }
+
+    .step-lbl.active,
+    .step-lbl.done {
+        color: var(--p-dark);
+    }
+
+    .stage {
+        display: none;
+    }
+
+    .stage.visible {
+        display: block;
+    }
+
+    .card {
+        background: #fff;
+        border: 0.5px solid var(--p-bordermid);
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .ch {
+        padding: 1.125rem 1.5rem;
+        border-bottom: 0.5px solid var(--p-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .ch-l {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .ch-ico {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: var(--p-pale);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .ch-ico svg {
+        width: 16px;
+        height: 16px;
+        color: var(--p-royal);
+    }
+
+    .ch-ico.green {
+        background: var(--p-green-bg);
+    }
+
+    .ch-ico.green svg {
+        color: var(--p-green);
+    }
+
+    .ch-title {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--p-dark);
+    }
+
+    .ch-sub {
+        font-size: 11px;
+        color: var(--p-muted);
+        margin-top: 1px;
+    }
+
+    .badge {
+        font-size: 10px;
+        font-weight: 500;
+        padding: 3px 8px;
+        border-radius: 20px;
+        letter-spacing: 0.03em;
+    }
+
+    .badge-blue {
+        background: var(--p-pale);
+        color: var(--p-royal);
+    }
+
+    .badge-green {
+        background: var(--p-green-bg);
+        color: var(--p-green);
+    }
+
+    .badge-amber {
+        background: #fef8e7;
+        color: #a06b00;
+    }
+
+    .cb {
+        padding: 1.5rem;
+    }
+
+    .next-btn {
+        width: 100%;
+        padding: 13px;
+        background: var(--p-royal);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 500;
+        font-family: 'DM Sans', sans-serif;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: background 0.15s;
+    }
+
+    .next-btn:hover {
+        background: var(--p-dark);
+    }
+
+    .next-btn:disabled {
+        background: var(--p-lavender);
+        cursor: not-allowed;
+    }
+
+    .next-btn svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 1.25rem;
+    }
+
+    .dc {
+        background: var(--p-surface);
+        border-radius: 8px;
+        padding: 10px 12px;
+    }
+
+    .dc-lbl {
+        font-size: 10px;
+        color: var(--p-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 3px;
+    }
+
+    .dc-val {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--p-dark);
+    }
+
+    .divider {
+        border: none;
+        border-top: 0.5px solid var(--p-border);
+        margin: 4px 0;
+    }
+
+    .ms-total-bar {
+        background: var(--p-pale);
+        border-radius: 10px;
+        padding: 12px 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.25rem;
+    }
+
+    .ms-total-lbl {
+        font-size: 12px;
+        color: var(--p-indigo);
+    }
+
+    .ms-total-val {
+        font-family: 'DM Mono', monospace;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--p-royal);
+    }
+
+    .ms-remain {
+        font-size: 11px;
+        color: var(--p-muted);
+        margin-top: 2px;
+    }
+
+    .ms-remain.warn {
+        color: var(--p-red);
+    }
+
+    .ms-remain.ok {
+        color: var(--p-green);
+    }
+
+    .alloc-bar-wrap {
+        margin-bottom: 1.25rem;
+    }
+
+    .alloc-bar {
+        height: 6px;
+        border-radius: 3px;
+        background: var(--p-border);
+        overflow: hidden;
+        display: flex;
+    }
+
+    .alloc-seg {
+        height: 6px;
+        transition: width 0.3s;
+    }
+
+    .alloc-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 16px;
+        margin-top: 8px;
+    }
+
+    .alloc-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 2px;
+        flex-shrink: 0;
+    }
+
+    .alloc-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        color: var(--p-muted);
+    }
+
+    .ms-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 1rem;
+    }
+
+    .ms-card {
+        border: 1px solid var(--p-bordermid);
+        border-radius: 10px;
+        padding: 12px 14px;
+        transition: border-color 0.15s;
+    }
+
+    .ms-card:hover {
+        border-color: var(--p-periwinkle);
+    }
+
+    .ms-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .ms-num {
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
+        background: var(--p-pale);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--p-royal);
+        flex-shrink: 0;
+    }
+
+    .ms-del {
+        width: 22px;
+        height: 22px;
+        border: none;
+        background: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 5px;
+        transition: background 0.15s;
+    }
+
+    .ms-del:hover {
+        background: var(--p-red-bg);
+    }
+
+    .ms-del svg {
+        width: 13px;
+        height: 13px;
+        color: var(--p-muted);
+    }
+
+    .ms-del:hover svg {
+        color: var(--p-red);
+    }
+
+    .ms-fields {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+        align-items: end;
+    }
+
+    .ms-name-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .ms-pct-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        width: 88px;
+    }
+
+    .flbl {
+        font-size: 10px;
+        font-weight: 500;
+        color: var(--p-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .finput {
+        width: 100%;
+        padding: 8px 10px;
+        border: 0.5px solid var(--p-bordermid);
+        border-radius: 7px;
+        font-size: 13px;
+        font-family: 'DM Sans', sans-serif;
+        color: var(--p-dark);
+        background: #fff;
+        outline: none;
+        transition: border-color 0.15s;
+    }
+
+    .finput:focus {
+        border-color: var(--p-royal);
+    }
+
+    .pct-input-wrap {
+        position: relative;
+    }
+
+    .pct-input-wrap .finput {
+        padding-right: 26px;
+        font-family: 'DM Mono', monospace;
+    }
+
+    .pct-suffix {
+        position: absolute;
+        right: 9px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 12px;
+        color: var(--p-muted);
+        pointer-events: none;
+    }
+
+    .ms-amount {
+        font-size: 11px;
+        color: var(--p-muted);
+        margin-top: 5px;
+        font-family: 'DM Mono', monospace;
+        text-align: right;
+    }
+
+    .ms-amount span {
+        color: var(--p-royal);
+        font-weight: 500;
+    }
+
+    .add-ms-btn {
+        width: 100%;
+        padding: 10px;
+        border: 1px dashed var(--p-bordermid);
+        border-radius: 10px;
+        background: none;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--p-muted);
+        font-family: 'DM Sans', sans-serif;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: all 0.15s;
+        margin-bottom: 1rem;
+    }
+
+    .add-ms-btn:hover {
+        border-color: var(--p-royal);
+        color: var(--p-royal);
+        background: var(--p-pale);
+    }
+
+    .add-ms-btn svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .ms-validate {
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 1rem;
+    }
+
+    .ms-validate.ok {
+        background: var(--p-green-bg);
+        color: var(--p-green);
+    }
+
+    .ms-validate.warn {
+        background: var(--p-red-bg);
+        color: var(--p-red);
+    }
+
+    .ms-validate svg {
+        width: 14px;
+        height: 14px;
+        flex-shrink: 0;
+    }
+
+    .brow {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 7px 0;
+        font-size: 13px;
+    }
+
+    .brow .lbl {
+        color: var(--p-muted);
+    }
+
+    .brow .val {
+        font-family: 'DM Mono', monospace;
+        font-size: 12px;
+        color: var(--p-dark);
+    }
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 12px 0 0;
+    }
+
+    .total-lbl {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--p-dark);
+    }
+
+    .total-val {
+        font-size: 22px;
+        font-weight: 500;
+        color: var(--p-royal);
+        font-family: 'DM Mono', monospace;
+        letter-spacing: -0.02em;
+    }
+
+    .task-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 1rem 1.25rem;
+        background: var(--p-pale);
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+    }
+
+    .task-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: var(--p-royal);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .task-icon svg {
+        width: 18px;
+        height: 18px;
+        color: #fff;
+    }
+
+    .task-name {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--p-dark);
+    }
+
+    .task-meta {
+        font-size: 11px;
+        color: var(--p-muted);
+        margin-top: 2px;
+    }
+
+    .task-amt {
+        margin-left: auto;
+        font-family: 'DM Mono', monospace;
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--p-royal);
+    }
+
+    .method-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 1.25rem;
+    }
+
+    .mopt {
+        padding: 12px 14px;
+        border: 1px solid var(--p-bordermid);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: border-color 0.15s, background 0.15s;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        position: relative;
+    }
+
+    .mopt.sel {
+        border-color: var(--p-royal);
+        background: var(--p-pale);
+    }
+
+    .mopt:not(.sel):hover {
+        background: var(--p-surface);
+    }
+
+    .mchk {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 1.5px solid var(--p-bordermid);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mopt.sel .mchk {
+        background: var(--p-royal);
+        border-color: var(--p-royal);
+    }
+
+    .mchk-in {
+        display: none;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #fff;
+    }
+
+    .mopt.sel .mchk-in {
+        display: block;
+    }
+
+    .micon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .mname {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--p-dark);
+    }
+
+    .mdesc {
+        font-size: 10px;
+        color: var(--p-muted);
+    }
+
+    .pay-btn {
+        width: 100%;
+        padding: 14px;
+        background: var(--p-royal);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        font-family: 'DM Sans', sans-serif;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: background 0.15s;
+    }
+
+    .pay-btn:hover {
+        background: var(--p-dark);
+    }
+
+    .pay-btn.processing {
+        background: var(--p-indigo);
+        pointer-events: none;
+    }
+
+    .pay-btn svg {
+        width: 15px;
+        height: 15px;
+    }
+
+    .trust-strip {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        margin-top: 1rem;
+    }
+
+    .trust-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        color: var(--p-muted);
+    }
+
+    .trust-item svg {
+        width: 12px;
+        height: 12px;
+    }
+
+    .notice {
+        display: flex;
+        gap: 10px;
+        padding: 12px 14px;
+        background: var(--p-surface);
+        border: 0.5px solid var(--p-bordermid);
+        border-radius: 10px;
+        margin-top: 1.25rem;
+    }
+
+    .notice-ico {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--p-pale);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    .notice-ico svg {
+        width: 10px;
+        height: 10px;
+        color: var(--p-royal);
+    }
+
+    .notice-title {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--p-dark);
+        margin-bottom: 2px;
+    }
+
+    .notice-text {
+        font-size: 11px;
+        color: var(--p-muted);
+        line-height: 1.6;
+    }
+
+    .tl {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        margin: 1rem 0 0;
+    }
+
+    .tl-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding-bottom: 14px;
+        position: relative;
+    }
+
+    .tl-row:not(:last-child)::before {
+        content: '';
+        position: absolute;
+        left: 7px;
+        top: 16px;
+        bottom: 0;
+        width: 1px;
+        background: var(--p-border);
+    }
+
+    .tl-dot {
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        border: 1.5px solid var(--p-bordermid);
+        background: #fff;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    .tl-dot.fill {
+        background: var(--p-royal);
+        border-color: var(--p-royal);
+    }
+
+    .tl-dot.half {
+        background: var(--p-pale);
+        border-color: var(--p-royal);
+    }
+
+    .tl-dot.done-g {
+        background: var(--p-green);
+        border-color: var(--p-green);
+    }
+
+    .tl-txt {
+        font-size: 12px;
+        color: var(--p-dark);
+    }
+
+    .tl-sub {
+        font-size: 11px;
+        color: var(--p-muted);
+        margin-top: 2px;
+    }
+
+    .ws-banner {
+        background: var(--p-pale);
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 1rem;
+    }
+
+    .ws-banner-ico {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: var(--p-royal);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .ws-banner-ico svg {
+        width: 18px;
+        height: 18px;
+        color: #fff;
+    }
+
+    .ws-btn {
+        margin-left: auto;
+        padding: 8px 14px;
+        background: var(--p-royal);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 500;
+        font-family: 'DM Sans', sans-serif;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .ws-btn:hover {
+        background: var(--p-dark);
+    }
+
+    .ms-summary-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin: 1rem 0;
+    }
+
+    .ms-sum-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        background: var(--p-surface);
+        border-radius: 8px;
+    }
+
+    .ms-sum-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 2px;
+        flex-shrink: 0;
+    }
+
+    .ms-sum-name {
+        font-size: 12px;
+        color: var(--p-dark);
+        flex: 1;
+    }
+
+    .ms-sum-pct {
+        font-size: 11px;
+        color: var(--p-muted);
+        font-family: 'DM Mono', monospace;
+    }
+
+    .ms-sum-amt {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--p-royal);
+        font-family: 'DM Mono', monospace;
+    }
+
+    .receipt-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 7px 0;
+        font-size: 12px;
+        border-bottom: 0.5px solid var(--p-border);
+    }
+
+    .receipt-row:last-child {
+        border-bottom: none;
+    }
+
+    .receipt-lbl {
+        color: var(--p-muted);
+    }
+
+    .receipt-val {
+        font-family: 'DM Mono', monospace;
+        font-weight: 500;
+        color: var(--p-dark);
+    }
+
+    .receipt-val.hi {
+        color: var(--p-royal);
+    }
+
+    .progress-bar-wrap {
+        background: var(--p-border);
+        border-radius: 4px;
+        height: 4px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 4px;
+        border-radius: 4px;
+        background: var(--p-royal);
+        transition: width 1s ease;
+    }
+
+    /* ── Provider Match Table ── */
+    .match-view {
+        display: none;
+    }
+
+    .match-view.active {
+        display: block;
+    }
+
+    .provider-table-wrap {
+        overflow-x: auto;
+        margin-bottom: 1.25rem;
+        padding: 0 4px 4px;
+    }
+
+    .provider-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+        font-size: 13px;
+    }
+
+    .provider-table thead tr {
+        border-bottom: none;
+    }
+
+    .provider-table th {
+        padding: 0 12px 6px;
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--p-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .provider-table td {
+        padding: 12px;
+        vertical-align: middle;
+        color: var(--p-dark);
+        background: #fff;
+        border-top: 1px solid var(--p-bordermid);
+        border-bottom: 1px solid var(--p-bordermid);
+    }
+
+    .provider-table td:first-child {
+        border-left: 1px solid var(--p-bordermid);
+        border-top-left-radius: 10px;
+        border-bottom-left-radius: 10px;
+    }
+
+    .provider-table td:last-child {
+        border-right: 1px solid var(--p-bordermid);
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+    }
+
+    .provider-table tbody tr {
+        transition: transform 0.15s, box-shadow 0.15s;
+        cursor: default;
+    }
+
+    .provider-table tbody tr:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(81, 86, 132, 0.08);
+    }
+
+    .prov-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 600;
+        color: #fff;
+        flex-shrink: 0;
+    }
+
+    .prov-name {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--p-dark);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .prov-spec {
+        font-size: 11px;
+        color: var(--p-muted);
+        margin-top: 2px;
+    }
+
+    .prov-rating {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 3px;
+    }
+
+    .prov-stars {
+        font-size: 11px;
+        color: var(--p-periwinkle);
+    }
+
+    .prov-rating-val {
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--p-indigo);
+    }
+
+    .prov-rating-cnt {
+        font-size: 11px;
+        color: var(--p-muted);
+    }
+
+    .prov-quote {
+        font-family: 'DM Mono', monospace;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--p-royal);
+        white-space: nowrap;
+    }
+
+    .prov-delivery {
+        font-size: 12px;
+        color: var(--p-muted);
+        white-space: nowrap;
+    }
+
+    .act-bar {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+    }
+
+    .act-btn {
+        border: none;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 500;
+        font-family: 'DM Sans', sans-serif;
+        cursor: pointer;
+        padding: 7px 10px;
+        transition: all 0.15s;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .act-btn svg {
+        width: 13px;
+        height: 13px;
+        stroke-width: 2;
+    }
+
+    .act-msg {
+        background: var(--p-pale);
+        color: var(--p-royal);
+    }
+
+    .act-msg:hover {
+        background: var(--p-periwinkle);
+        color: #fff;
+    }
+
+    .act-reject {
+        background: var(--p-red-bg);
+        color: var(--p-red);
+    }
+
+    .act-reject:hover {
+        background: var(--p-red);
+        color: #fff;
+    }
+
+    .act-shortlist {
+        background: #fef8e7;
+        color: #a06b00;
+    }
+
+    .act-shortlist.active {
+        background: #a06b00;
+        color: #fff;
+    }
+
+    .act-shortlist:hover {
+        background: #a06b00;
+        color: #fff;
+    }
+
+    .act-finalize {
+        background: var(--p-royal);
+        color: #fff;
+    }
+
+    .act-finalize:hover {
+        background: var(--p-dark);
+    }
+
+    .badge-shortlisted {
+        background: #fef8e7;
+        color: #a06b00;
+        font-size: 9px;
+        font-weight: 600;
+        padding: 2px 6px;
+        border-radius: 10px;
+        letter-spacing: 0.03em;
+        display: inline-flex;
+    }
+
+    /* Reject list */
+    .reject-list-section {
+        margin-top: 1rem;
+    }
+
+    .reject-list-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        padding: 8px 12px;
+        background: var(--p-surface);
+        border: 0.5px solid var(--p-border);
+        border-radius: 8px;
+    }
+
+    .reject-list-title {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--p-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .reject-count-badge {
+        background: var(--p-red-bg);
+        color: var(--p-red);
+        font-size: 10px;
+        font-weight: 600;
+        padding: 1px 7px;
+        border-radius: 10px;
+    }
+
+    .reject-list-body {
+        display: none;
+        padding: 8px 0 0;
+    }
+
+    .reject-list-body.open {
+        display: block;
+    }
+
+    .reject-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: var(--p-surface);
+        margin-bottom: 6px;
+        border: 0.5px solid var(--p-border);
+    }
+
+    .reject-item-name {
+        font-size: 12px;
+        color: var(--p-dark);
+        flex: 1;
+    }
+
+    .reject-item-reason {
+        font-size: 10px;
+        color: var(--p-muted);
+    }
+
+    /* Messaging popup */
+    .msg-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(40, 40, 70, 0.38);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+    }
+
+    .msg-overlay.open {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    .msg-sheet {
+        background: #fff;
+        border-radius: 20px 20px 0 0;
+        width: 100%;
+        max-width: 540px;
+        padding: 1.5rem;
+        transform: translateY(40px);
+        transition: transform 0.25s cubic-bezier(.32, .72, 0, 1);
+    }
+
+    .msg-overlay.open .msg-sheet {
+        transform: translateY(0);
+    }
+
+    .msg-sheet-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .msg-sheet-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--p-dark);
+    }
+
+    .msg-close {
+        width: 28px;
+        height: 28px;
+        border: none;
+        background: var(--p-surface);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .msg-close svg {
+        width: 12px;
+        height: 12px;
+        color: var(--p-muted);
+    }
+
+    .msg-to {
+        font-size: 11px;
+        color: var(--p-muted);
+        margin-bottom: 0.75rem;
+    }
+
+    .msg-to span {
+        font-weight: 600;
+        color: var(--p-dark);
+    }
+
+    .msg-textarea {
+        width: 100%;
+        min-height: 100px;
+        resize: vertical;
+        padding: 10px 12px;
+        border: 0.5px solid var(--p-bordermid);
+        border-radius: 10px;
+        font-size: 13px;
+        font-family: 'DM Sans', sans-serif;
+        color: var(--p-dark);
+        outline: none;
+        transition: border-color 0.15s;
+    }
+
+    .msg-textarea:focus {
+        border-color: var(--p-royal);
+    }
+
+    .msg-send-btn {
+        width: 100%;
+        margin-top: 0.75rem;
+        padding: 12px;
+        background: var(--p-royal);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 500;
+        font-family: 'DM Sans', sans-serif;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+
+    .msg-send-btn:hover {
+        background: var(--p-dark);
+    }
+
+    /* Finalized provider view */
+    #match-finalized .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        color: var(--p-muted);
+        cursor: pointer;
+        margin-bottom: 1rem;
+        border: none;
+        background: none;
+        font-family: 'DM Sans', sans-serif;
+        padding: 0;
+        transition: color 0.15s;
+    }
+
+    #match-finalized .back-link:hover {
+        color: var(--p-royal);
+    }
+
+    #match-finalized .back-link svg {
+        width: 13px;
+        height: 13px;
+    }
+</style>
+
+<div class="root">
+    <div class="shell">
+
+        <div class="step-track" id="step-track"></div>
+
+        <div class="stage" id="stage-0">
+            <div class="card">
+                <div class="ch">
+                    <div class="ch-l">
+                        <div class="ch-ico"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path d="M2 4h12v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4z" />
+                                <path d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1" />
+                            </svg></div>
+                        <div>
+                            <div class="ch-title">Project brief</div>
+                            <div class="ch-sub">Step 1 of 5 — completed</div>
+                        </div>
+                    </div>
+                    <span class="badge badge-green">Done</span>
+                </div>
+                <div class="cb">
+                    <div class="detail-grid">
+                        <div class="dc">
+                            <div class="dc-lbl">Task type</div>
+                            <div class="dc-val">Quick task</div>
+                        </div>
+                        <div class="dc">
+                            <div class="dc-lbl">Category</div>
+                            <div class="dc-val">Design</div>
+                        </div>
+                        <div class="dc">
+                            <div class="dc-lbl">Deadline</div>
+                            <div class="dc-val">Dec 15, 2024</div>
+                        </div>
+                        <div class="dc">
+                            <div class="dc-lbl">Budget</div>
+                            <div class="dc-val">&#8377;8,000</div>
+                        </div>
+                    </div>
+                    <div
+                        style="background:var(--p-surface);border-radius:10px;padding:12px 14px;margin-bottom:1.25rem;">
+                        <div class="dc-lbl" style="margin-bottom:6px;">Deliverable description</div>
+                        <div style="font-size:13px;color:var(--p-dark);line-height:1.6;">Full logo and brand kit in
+                            Figma — primary + secondary marks, color tokens, typography scale, and usage guidelines.
+                        </div>
+                    </div>
+                    <button class="next-btn" onclick="goTo(1)">Continue to provider match <svg viewBox="0 0 14 14"
+                            fill="none" stroke="white" stroke-width="1.5">
+                            <polyline points="5,2 10,7 5,12" />
+                        </svg></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="stage" id="stage-1">
+            <div class="card">
+                <div class="ch">
+                    <div class="ch-l">
+                        <div class="ch-ico"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <circle cx="6" cy="6" r="3" />
+                                <circle cx="11" cy="10" r="3" />
+                                <path d="M8.5 7.5l1 1" />
+                            </svg></div>
+                        <div>
+                            <div class="ch-title">Provider match</div>
+                            <div class="ch-sub" id="match-sub">Step 2 of 5 — select a provider</div>
+                        </div>
+                    </div>
+                    <span class="badge badge-blue" id="match-badge">Matching</span>
+                </div>
+                <div class="cb">
+
+                    <!-- ── Table view ── -->
+                    <div class="match-view active" id="match-table-view">
+                        <div style="font-size:12px;color:var(--p-muted);margin-bottom:1rem;line-height:1.6;">Review the
+                            matched service providers below. Message to discuss, shortlist your favourites, and finalize
+                            when ready.</div>
+                        <div class="provider-table-wrap">
+                            <table class="provider-table" id="provider-table">
+                                <thead>
+                                    <tr>
+                                        <th>Provider</th>
+                                        <th>Quote</th>
+                                        <th>Delivery</th>
+                                        <th>Rating</th>
+                                        <th style="text-align:center;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="provider-tbody"></tbody>
+                            </table>
+                        </div>
+
+                        <!-- Reject list -->
+                        <div class="reject-list-section" id="reject-section" style="display:none;">
+                            <div class="reject-list-header" onclick="toggleRejectList()">
+                                <span class="reject-list-title">
+                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor"
+                                        stroke-width="1.5">
+                                        <circle cx="6" cy="6" r="5" />
+                                        <line x1="4" y1="4" x2="8" y2="8" />
+                                        <line x1="8" y1="4" x2="4" y2="8" />
+                                    </svg>
+                                    Rejected providers
+                                    <span class="reject-count-badge" id="reject-count">0</span>
+                                </span>
+                                <svg id="reject-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none"
+                                    stroke="currentColor" stroke-width="1.5" style="transition:transform 0.2s;">
+                                    <polyline points="3,4.5 6,7.5 9,4.5" />
+                                </svg>
+                            </div>
+                            <div class="reject-list-body" id="reject-list-body"></div>
+                        </div>
+                    </div>
+
+                    <!-- ── Finalized view ── -->
+                    <div class="match-view" id="match-finalized">
+                        <button class="back-link" onclick="backToTable()">
+                            <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <polyline points="8,2 3,6.5 8,11" />
+                            </svg>
+                            Back to provider list
+                        </button>
+                        <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--p-pale);border-radius:10px;margin-bottom:1.25rem;"
+                            id="finalized-hero"></div>
+                        <div class="detail-grid" id="finalized-details"></div>
+                        <button class="next-btn" onclick="goTo(2)">Set up milestones <svg viewBox="0 0 14 14"
+                                fill="none" stroke="white" stroke-width="1.5">
+                                <polyline points="5,2 10,7 5,12" />
+                            </svg></button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Messaging popup -->
+        <div class="msg-overlay" id="msg-overlay" onclick="closeMsgPopup(event)">
+            <div class="msg-sheet">
+                <div class="msg-sheet-header">
+                    <div class="msg-sheet-title">Send Message</div>
+                    <button class="msg-close" onclick="closeMsg()"><svg viewBox="0 0 12 12" fill="none"
+                            stroke="currentColor" stroke-width="1.8">
+                            <line x1="2" y1="2" x2="10" y2="10" />
+                            <line x1="10" y1="2" x2="2" y2="10" />
+                        </svg></button>
+                </div>
+                <div class="msg-to">To: <span id="msg-to-name">—</span></div>
+                <textarea class="msg-textarea" id="msg-textarea" placeholder="Write your message here…"></textarea>
+                <button class="msg-send-btn" onclick="sendMsg()">Send Message</button>
+            </div>
+        </div>
+
+        <div class="stage" id="stage-2">
+            <div class="card">
+                <div class="ch">
+                    <div class="ch-l">
+                        <div class="ch-ico"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path d="M2 8h12M8 2v12" />
+                                <circle cx="8" cy="8" r="6" />
+                            </svg></div>
+                        <div>
+                            <div class="ch-title">Milestones</div>
+                            <div class="ch-sub">Split payment across deliverables</div>
+                        </div>
+                    </div>
+                    <span class="badge badge-blue" id="ms-badge">Step 3 of 5</span>
+                </div>
+                <div class="cb">
+                    <div class="ms-total-bar">
+                        <div>
+                            <div class="ms-total-lbl">Total project amount</div>
+                            <div class="ms-remain" id="ms-remain-text">Allocate 100% across milestones</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div class="ms-total-val">&#8377;8,000</div>
+                            <div style="font-size:11px;color:var(--p-muted);margin-top:2px;font-family:'DM Mono',monospace;"
+                                id="ms-remain-val">0% allocated</div>
+                        </div>
+                    </div>
+
+                    <div class="alloc-bar-wrap">
+                        <div class="alloc-bar" id="alloc-bar"></div>
+                        <div class="alloc-legend" id="alloc-legend"></div>
+                    </div>
+
+                    <div class="ms-list" id="ms-list"></div>
+
+                    <button class="add-ms-btn" id="add-ms-btn" onclick="addMilestone()">
+                        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <line x1="7" y1="2" x2="7" y2="12" />
+                            <line x1="2" y1="7" x2="12" y2="7" />
+                        </svg>
+                        Add milestone
+                    </button>
+
+                    <div class="ms-validate" id="ms-validate" style="display:none;"></div>
+
+                    <button class="next-btn" id="ms-next-btn" onclick="goTo(3)" disabled>
+                        Continue to payment
+                        <svg viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="1.5">
+                            <polyline points="5,2 10,7 5,12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="stage" id="stage-3">
+            <div class="card">
+                <div class="ch">
+                    <div class="ch-l">
+                        <div class="ch-ico"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <rect x="1" y="3" width="14" height="10" rx="2" />
+                                <polyline points="1,6 15,6" />
+                            </svg></div>
+                        <div>
+                            <div class="ch-title">Order summary</div>
+                            <div class="ch-sub">Review milestones &amp; pay</div>
+                        </div>
+                    </div>
+                    <span class="badge badge-blue">Step 4 of 5</span>
+                </div>
+                <div class="cb">
+                    <div class="task-row">
+                        <div class="task-icon"><svg viewBox="0 0 18 18" fill="none" stroke="white" stroke-width="1.5">
+                                <rect x="3" y="3" width="12" height="12" rx="2" />
+                                <path d="M6 9l2 2 4-4" />
+                            </svg></div>
+                        <div>
+                            <div class="task-name">Logo &amp; Brand Kit</div>
+                            <div class="task-meta">Alex Design Studio</div>
+                        </div>
+                        <div class="task-amt">&#8377;8,000</div>
+                    </div>
+
+                    <div
+                        style="font-size:11px;font-weight:500;color:var(--p-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">
+                        Milestone breakdown</div>
+                    <div class="ms-summary-list" id="ms-summary-list"></div>
+
+                    <div style="margin-top:1rem;">
+                        <div class="brow"><span class="lbl">Task fee</span><span class="val">&#8377;8,000</span></div>
+                        <div class="brow"><span class="lbl">Platform protection</span><span
+                                class="val">&#8377;400</span></div>
+                        <div class="brow"><span class="lbl">GST (18%)</span><span class="val">&#8377;1,512</span></div>
+                        <hr class="divider">
+                        <div class="total-row"><span class="total-lbl">Total payable</span><span
+                                class="total-val">&#8377;9,912</span></div>
+                    </div>
+
+                    <div class="notice">
+                        <div class="notice-ico"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <circle cx="5" cy="5" r="4" />
+                                <line x1="5" y1="3" x2="5" y2="5.5" />
+                                <circle cx="5" cy="7" r="0.5" fill="currentColor" />
+                            </svg></div>
+                        <div>
+                            <div class="notice-title">Milestone-based escrow</div>
+                            <div class="notice-text">Each milestone's amount releases individually upon your approval —
+                                giving you control at every stage.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="ch">
+                    <div class="ch-l">
+                        <div class="ch-ico"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <rect x="1" y="3" width="14" height="10" rx="2" />
+                                <path d="M1 6h14" />
+                            </svg></div>
+                        <div>
+                            <div class="ch-title">Payment method</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="cb">
+                    <div class="method-grid">
+                        <div class="mopt sel" onclick="selMethod(this,true)">
+                            <div class="mchk">
+                                <div class="mchk-in"></div>
+                            </div>
+                            <div class="micon"><svg viewBox="0 0 20 20" fill="none" stroke="#5156B1" stroke-width="1.5">
+                                    <rect x="1" y="4" width="18" height="12" rx="2" />
+                                    <path d="M1 8h18" />
+                                </svg></div>
+                            <div class="mname">Card</div>
+                            <div class="mdesc">Visa, Mastercard, RuPay</div>
+                        </div>
+                        <div class="mopt" onclick="selMethod(this,false,'upi')">
+                            <div class="mchk">
+                                <div class="mchk-in"></div>
+                            </div>
+                            <div class="micon"><svg viewBox="0 0 20 20" fill="none" stroke="#5156B1" stroke-width="1.5">
+                                    <circle cx="10" cy="10" r="8" />
+                                    <path d="M10 6v8M7 8.5c0-1.5 6-1.5 6 0 0 2-6 2-6 4 0 1.5 6 1.5 6 0" />
+                                </svg></div>
+                            <div class="mname">UPI</div>
+                            <div class="mdesc">GPay, PhonePe, Paytm</div>
+                        </div>
+                        <div class="mopt" onclick="selMethod(this,false,'net')">
+                            <div class="mchk">
+                                <div class="mchk-in"></div>
+                            </div>
+                            <div class="micon"><svg viewBox="0 0 20 20" fill="none" stroke="#5156B1" stroke-width="1.5">
+                                    <rect x="3" y="5" width="14" height="12" rx="2" />
+                                    <path d="M7 5V4a3 3 0 016 0v1" />
+                                </svg></div>
+                            <div class="mname">Net banking</div>
+                            <div class="mdesc">All major banks</div>
+                        </div>
+                        <div class="mopt" onclick="selMethod(this,false,'wallet')">
+                            <div class="mchk">
+                                <div class="mchk-in"></div>
+                            </div>
+                            <div class="micon"><svg viewBox="0 0 20 20" fill="none" stroke="#5156B1" stroke-width="1.5">
+                                    <path d="M4 10h12M10 4v12" />
+                                    <circle cx="10" cy="10" r="7" />
+                                </svg></div>
+                            <div class="mname">Wallet</div>
+                            <div class="mdesc">Airtel, Freecharge</div>
+                        </div>
+                    </div>
+                    <div id="fields-card">
+                        <div style="margin-bottom:1rem;"><label
+                                style="font-size:10px;font-weight:500;color:var(--p-muted);text-transform:uppercase;letter-spacing:0.04em;display:block;margin-bottom:6px;">Card
+                                number</label><input class="finput" type="text" placeholder="1234  5678  9012  3456"
+                                maxlength="22" oninput="fmtCard(this)"></div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem;">
+                            <div><label
+                                    style="font-size:10px;font-weight:500;color:var(--p-muted);text-transform:uppercase;letter-spacing:0.04em;display:block;margin-bottom:6px;">Expiry</label><input
+                                    class="finput" type="text" placeholder="MM / YY" maxlength="7"
+                                    oninput="fmtExpiry(this)"></div>
+                            <div><label
+                                    style="font-size:10px;font-weight:500;color:var(--p-muted);text-transform:uppercase;letter-spacing:0.04em;display:block;margin-bottom:6px;">CVV</label><input
+                                    class="finput" type="password" placeholder="···" maxlength="3"></div>
+                        </div>
+                        <div style="margin-bottom:1rem;"><label
+                                style="font-size:10px;font-weight:500;color:var(--p-muted);text-transform:uppercase;letter-spacing:0.04em;display:block;margin-bottom:6px;">Name
+                                on card</label><input class="finput" type="text" placeholder="Sarah Johnson"></div>
+                    </div>
+                    <div id="fields-upi" style="display:none;margin-bottom:1rem;"><label
+                            style="font-size:10px;font-weight:500;color:var(--p-muted);text-transform:uppercase;letter-spacing:0.04em;display:block;margin-bottom:6px;">UPI
+                            ID</label><input class="finput" type="text" placeholder="name@upi"></div>
+                    <div id="fields-net" style="display:none;margin-bottom:1rem;"><label
+                            style="font-size:10px;font-weight:500;color:var(--p-muted);text-transform:uppercase;letter-spacing:0.04em;display:block;margin-bottom:6px;">Select
+                            bank</label><select class="finput">
+                            <option>State Bank of India</option>
+                            <option>HDFC Bank</option>
+                            <option>ICICI Bank</option>
+                            <option>Axis Bank</option>
+                            <option>Kotak Mahindra</option>
+                        </select></div>
+                    <div id="fields-wallet" style="display:none;margin-bottom:1rem;"><label
+                            style="font-size:10px;font-weight:500;color:var(--p-muted);text-transform:uppercase;letter-spacing:0.04em;display:block;margin-bottom:6px;">Mobile
+                            number</label><input class="finput" type="tel" placeholder="98XXXXXXXX" maxlength="10">
+                    </div>
+
+                    <button class="pay-btn" id="pay-btn" onclick="handlePay()">
+                        <svg viewBox="0 0 15 15" fill="none" stroke="white" stroke-width="1.5">
+                            <rect x="1" y="3" width="13" height="9" rx="1.5" />
+                            <path d="M1 6h13" />
+                            <rect x="3" y="8" width="2" height="1.5" rx="0.5" fill="white" stroke="none" />
+                        </svg>
+                        Pay &#8377;9,912 &amp; unlock workspace
+                    </button>
+                    <div class="trust-strip">
+                        <div class="trust-item"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path d="M6 1L2 3v4c0 2 2 3.5 4 4 2-.5 4-2 4-4V3L6 1z" />
+                            </svg>256-bit SSL</div>
+                        <div class="trust-item"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path d="M6 1L2 3v4c0 2 2 3.5 4 4 2-.5 4-2 4-4V3L6 1z" />
+                                <polyline points="4,6 5.5,7.5 8,4.5" />
+                            </svg>Escrow protected</div>
+                        <div class="trust-item"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <circle cx="6" cy="6" r="5" />
+                                <polyline points="4,6 5.5,7.5 8,4.5" />
+                            </svg>RBI compliant</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stage" id="stage-4">
+            <div class="card">
+                <div class="ch">
+                    <div class="ch-l">
+                        <div class="ch-ico green"><svg viewBox="0 0 16 16" fill="none" stroke="#1a7a4a"
+                                stroke-width="1.5">
+                                <circle cx="8" cy="8" r="6" />
+                                <polyline points="5,8 7,10 11,6" />
+                            </svg></div>
+                        <div>
+                            <div class="ch-title">Payment confirmed</div>
+                            <div class="ch-sub">Workspace is now active</div>
+                        </div>
+                    </div>
+                    <span class="badge badge-green">Active</span>
+                </div>
+                <div class="cb">
+                    <div style="text-align:center;padding:1.5rem 0 1rem;">
+                        <div
+                            style="width:56px;height:56px;border-radius:50%;background:var(--p-green-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1a7a4a"
+                                stroke-width="1.5">
+                                <polyline points="4,12 9,17 20,7" />
+                            </svg>
+                        </div>
+                        <div style="font-size:18px;font-weight:500;color:var(--p-dark);margin-bottom:6px;">&#8377;9,912
+                            secured in escrow</div>
+                        <div style="font-size:13px;color:var(--p-muted);line-height:1.6;">Alex Design Studio has been
+                            notified and will begin work shortly.</div>
+                    </div>
+
+                    <div class="ws-banner">
+                        <div class="ws-banner-ico"><svg viewBox="0 0 18 18" fill="none" stroke="white"
+                                stroke-width="1.5">
+                                <rect x="2" y="2" width="14" height="14" rx="3" />
+                                <path d="M6 9l2 2 4-4" />
+                            </svg></div>
+                        <div>
+                            <div style="font-size:13px;font-weight:500;color:var(--p-dark);">Logo &amp; Brand Kit</div>
+                            <div style="font-size:11px;color:var(--p-muted);margin-top:2px;">Task #T-4521 · Deadline Dec
+                                15, 2024</div>
+                        </div>
+                        <button class="ws-btn">Open workspace</button>
+                    </div>
+
+                    <div style="margin-bottom:1rem;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                            <span style="font-size:12px;font-weight:500;color:var(--p-dark);">Overall progress</span>
+                            <span style="font-size:12px;font-family:'DM Mono',monospace;color:var(--p-royal);"
+                                id="prog-pct">0%</span>
+                        </div>
+                        <div class="progress-bar-wrap">
+                            <div class="progress-bar" id="prog-bar" style="width:0%"></div>
+                        </div>
+                    </div>
+
+                    <div
+                        style="font-size:11px;font-weight:500;color:var(--p-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">
+                        Milestone escrow status</div>
+                    <div id="ws-ms-list" style="margin-bottom:1rem;"></div>
+
+                    <hr class="divider" style="margin:1.25rem 0;">
+                    <div
+                        style="font-size:11px;font-weight:500;color:var(--p-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">
+                        Payment receipt</div>
+                    <div class="receipt-row"><span class="receipt-lbl">Transaction ID</span><span
+                            class="receipt-val">TXN-84921-AIT</span></div>
+                    <div class="receipt-row"><span class="receipt-lbl">Task fee</span><span
+                            class="receipt-val">&#8377;8,000</span></div>
+                    <div class="receipt-row"><span class="receipt-lbl">Platform protection</span><span
+                            class="receipt-val">&#8377;400</span></div>
+                    <div class="receipt-row"><span class="receipt-lbl">GST</span><span
+                            class="receipt-val">&#8377;1,512</span></div>
+                    <div class="receipt-row"><span class="receipt-lbl">Total charged</span><span
+                            class="receipt-val hi">&#8377;9,912</span></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    var cur = 2;
+    var paid = false;
+    var TOTAL = 8000;
+    var SEG_COLORS = ['#5156B1', '#9192D7', '#C5C6E6', '#47496F', '#6E7097'];
+
+    var milestones = [
+        { id: 1, name: 'Initial concepts', pct: 30 },
+        { id: 2, name: 'Revisions & refinement', pct: 50 },
+        { id: 3, name: 'Final delivery', pct: 20 }
+    ];
+    var nextId = 4;
+
+    var STEPS = ['Brief', 'Match', 'Milestones', 'Payment', 'Workspace'];
+
+    /* ── Provider Match data ── */
+    var AVATAR_COLORS = ['#5156B1', '#47496F', '#1a7a4a', '#a06b00', '#9192D7', '#c0392b', '#2980b9'];
+    var ALL_PROVIDERS = [
+        { id: 1, initials: 'AD', name: 'Alex Design Studio', spec: 'Brand identity specialist', rating: 4.9, projects: 84, quote: 8000, delivery: '5–7 days', tools: 'Figma, AI', specialisation: 'Brand identity' },
+        { id: 2, initials: 'KS', name: 'Kreative Spark', spec: 'Logo & visual systems', rating: 4.7, projects: 62, quote: 7500, delivery: '4–6 days', tools: 'Illustrator', specialisation: 'Logo design' },
+        { id: 3, initials: 'PM', name: 'PixelMind Co.', spec: 'UI/UX & branding', rating: 4.8, projects: 110, quote: 9200, delivery: '6–8 days', tools: 'Figma, Sketch', specialisation: 'UI/UX branding' },
+        { id: 4, initials: 'DL', name: 'DesignLab India', spec: 'Print & digital branding', rating: 4.6, projects: 48, quote: 6800, delivery: '5–7 days', tools: 'CorelDRAW', specialisation: 'Print design' },
+        { id: 5, initials: 'ST', name: 'Studio Tangent', spec: 'Motion & brand kits', rating: 4.9, projects: 93, quote: 10000, delivery: '7–10 days', tools: 'After Effects', specialisation: 'Motion design' },
+        { id: 6, initials: 'BF', name: 'BrandForge Studio', spec: 'Premium brand strategy', rating: 5.0, projects: 37, quote: 12000, delivery: '8–12 days', tools: 'Figma, AI', specialisation: 'Brand strategy' },
+        { id: 7, initials: 'VD', name: 'VectorDen', spec: 'Illustration & icons', rating: 4.5, projects: 74, quote: 5500, delivery: '3–5 days', tools: 'Illustrator', specialisation: 'Illustration' },
+        { id: 8, initials: 'NR', name: 'Neon Routes Creative', spec: 'Digital-first branding', rating: 4.8, projects: 55, quote: 8800, delivery: '5–7 days', tools: 'Figma', specialisation: 'Brand identity' },
+        { id: 9, initials: 'TK', name: 'ThinkKit Design', spec: 'Startup branding expert', rating: 4.7, projects: 68, quote: 7200, delivery: '4–6 days', tools: 'Figma, Adobe CC', specialisation: 'Startup branding' },
+        { id: 10, initials: 'CP', name: 'CraftPixel Studio', spec: 'Luxury brand identity', rating: 4.9, projects: 29, quote: 11000, delivery: '7–9 days', tools: 'Figma, Sketch', specialisation: 'Luxury branding' },
+    ];
+
+    var activeProviders = [];  // shown in table (max 4)
+    var rejectedProviders = [];
+    var shortlisted = {};        // id → true
+    var providerPoolIdx = 4;    // next provider to pull from pool
+    var finalizedProvider = null;
+
+    function initMatchTable() {
+        activeProviders = ALL_PROVIDERS.slice(0, 4);
+        providerPoolIdx = 4;
+        rejectedProviders = [];
+        shortlisted = {};
+        finalizedProvider = null;
+        renderProviderTable();
+    }
+
+    function renderProviderTable() {
+        var tbody = document.getElementById('provider-tbody');
+        tbody.innerHTML = '';
+        activeProviders.forEach(function (p, idx) {
+            var color = AVATAR_COLORS[p.id % AVATAR_COLORS.length];
+            var isShortlisted = shortlisted[p.id];
+            var tr = document.createElement('tr');
+            tr.id = 'prow-' + p.id;
+            tr.innerHTML =
+                '<td>' +
+                '<div style="display:flex;align-items:center;gap:12px;">' +
+                '<div class="prov-avatar" style="background:' + color + '">' + p.initials + '</div>' +
+                '<div>' +
+                '<div class="prov-name">' + p.name + (isShortlisted ? ' <span class="badge-shortlisted">★ Shortlisted</span>' : '') + '</div>' +
+                '<div class="prov-spec">' + p.spec + '</div>' +
+                '</div>' +
+                '</div>' +
+                '</td>' +
+                '<td><span class="prov-quote">&#8377;' + p.quote.toLocaleString('en-IN') + '</span></td>' +
+                '<td><span class="prov-delivery">' + p.delivery + '</span></td>' +
+                '<td>' +
+                '<div class="prov-rating">' +
+                '<span class="prov-stars">★</span>' +
+                '<span class="prov-rating-val">' + p.rating + '</span>' +
+                '<span class="prov-rating-cnt">· ' + p.projects + ' proj</span>' +
+                '</div>' +
+                '</td>' +
+                '<td>' +
+                '<div class="act-bar">' +
+                '<button class="act-btn act-msg" onclick="openMsg(' + p.id + ')" title="Message"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Message</button>' +
+                '<button class="act-btn act-shortlist' + (isShortlisted ? ' active' : '') + '" onclick="toggleShortlist(' + p.id + ')" title="Shortlist"><svg viewBox="0 0 24 24" fill="' + (isShortlisted ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> ' + (isShortlisted ? 'Listed' : 'Shortlist') + '</button>' +
+                '<button class="act-btn act-reject" onclick="rejectProvider(' + p.id + ')" title="Reject"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Reject</button>' +
+                '<button class="act-btn act-finalize" onclick="finalizeProvider(' + p.id + ')" title="Finalize"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Finalize</button>' +
+                '</div>' +
+                '</td>';
+            tbody.appendChild(tr);
+        });
+        renderRejectList();
+    }
+
+    function rejectProvider(id) {
+        var p = activeProviders.find(function (x) { return x.id === id; });
+        if (!p) return;
+        rejectedProviders.push(p);
+        activeProviders = activeProviders.filter(function (x) { return x.id !== id; });
+        delete shortlisted[id];
+        // pull next from pool
+        while (providerPoolIdx < ALL_PROVIDERS.length) {
+            var next = ALL_PROVIDERS[providerPoolIdx++];
+            var alreadyRejected = rejectedProviders.some(function (r) { return r.id === next.id; });
+            var alreadyActive = activeProviders.some(function (a) { return a.id === next.id; });
+            if (!alreadyRejected && !alreadyActive) {
+                activeProviders.push(next);
+                break;
+            }
+        }
+        renderProviderTable();
+    }
+
+    function toggleShortlist(id) {
+        if (shortlisted[id]) delete shortlisted[id];
+        else shortlisted[id] = true;
+        renderProviderTable();
+    }
+
+    function finalizeProvider(id) {
+        var p = activeProviders.find(function (x) { return x.id === id; });
+        if (!p) return;
+        finalizedProvider = p;
+        // switch views
+        document.getElementById('match-table-view').classList.remove('active');
+        document.getElementById('match-finalized').classList.add('active');
+        document.querySelector('.shell').style.maxWidth = '540px';
+        var color = AVATAR_COLORS[p.id % AVATAR_COLORS.length];
+        document.getElementById('finalized-hero').innerHTML =
+            '<div style="width:44px;height:44px;border-radius:12px;background:' + color + ';display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;color:#fff;flex-shrink:0;">' + p.initials + '</div>' +
+            '<div style="flex:1;">' +
+            '<div style="font-size:13px;font-weight:500;color:var(--p-dark);">' + p.name + '</div>' +
+            '<div style="font-size:11px;color:var(--p-muted);margin-top:2px;">' + p.spec + '</div>' +
+            '<div style="display:flex;align-items:center;gap:4px;margin-top:4px;">' +
+            '<svg width="11" height="11" viewBox="0 0 11 11" fill="#9192D7"><polygon points="5.5,1 7,4 10,4.3 7.8,6.4 8.5,9.5 5.5,7.8 2.5,9.5 3.2,6.4 1,4.3 4,4"/></svg>' +
+            '<span style="font-size:11px;color:var(--p-indigo);font-weight:500;">' + p.rating + '</span>' +
+            '<span style="font-size:11px;color:var(--p-muted);">· ' + p.projects + ' projects</span>' +
+            '</div>' +
+            '</div>' +
+            '<div style="text-align:right;">' +
+            '<div style="font-size:11px;color:var(--p-muted);">Quote</div>' +
+            '<div style="font-family:\'DM Mono\',monospace;font-size:16px;font-weight:500;color:var(--p-royal);">&#8377;' + p.quote.toLocaleString('en-IN') + '</div>' +
+            '</div>';
+        document.getElementById('finalized-details').innerHTML =
+            '<div class="dc"><div class="dc-lbl">Est. delivery</div><div class="dc-val">' + p.delivery + '</div></div>' +
+            '<div class="dc"><div class="dc-lbl">Response rate</div><div class="dc-val">98%</div></div>' +
+            '<div class="dc"><div class="dc-lbl">Specialisation</div><div class="dc-val">' + p.specialisation + '</div></div>' +
+            '<div class="dc"><div class="dc-lbl">Tools</div><div class="dc-val">' + p.tools + '</div></div>';
+        // update badge
+        var badge = document.getElementById('match-badge');
+        badge.className = 'badge badge-green';
+        badge.textContent = 'Matched';
+        document.getElementById('match-sub').textContent = 'Step 2 of 5 — matched';
+    }
+
+    function backToTable() {
+        finalizedProvider = null;
+        document.getElementById('match-finalized').classList.remove('active');
+        document.getElementById('match-table-view').classList.add('active');
+        document.querySelector('.shell').style.maxWidth = '860px';
+        var badge = document.getElementById('match-badge');
+        badge.className = 'badge badge-blue';
+        badge.textContent = 'Matching';
+        document.getElementById('match-sub').textContent = 'Step 2 of 5 — select a provider';
+    }
+
+    function renderRejectList() {
+        var section = document.getElementById('reject-section');
+        var body = document.getElementById('reject-list-body');
+        var countEl = document.getElementById('reject-count');
+        if (rejectedProviders.length === 0) { section.style.display = 'none'; return; }
+        section.style.display = 'block';
+        countEl.textContent = rejectedProviders.length;
+        body.innerHTML = '';
+        rejectedProviders.forEach(function (p) {
+            var color = AVATAR_COLORS[p.id % AVATAR_COLORS.length];
+            var item = document.createElement('div');
+            item.className = 'reject-item';
+            item.innerHTML =
+                '<div class="prov-avatar" style="width:28px;height:28px;border-radius:8px;background:' + color + ';font-size:10px;">' + p.initials + '</div>' +
+                '<span class="reject-item-name">' + p.name + '</span>' +
+                '<span class="reject-item-reason">&#8377;' + p.quote.toLocaleString('en-IN') + ' · Rejected</span>';
+            body.appendChild(item);
+        });
+    }
+
+    function toggleRejectList() {
+        var body = document.getElementById('reject-list-body');
+        var chevron = document.getElementById('reject-chevron');
+        body.classList.toggle('open');
+        chevron.style.transform = body.classList.contains('open') ? 'rotate(180deg)' : '';
+    }
+
+    /* Messaging popup */
+    var msgTargetId = null;
+    function openMsg(id) {
+        var p = activeProviders.find(function (x) { return x.id === id; });
+        if (!p) return;
+        msgTargetId = id;
+        document.getElementById('msg-to-name').textContent = p.name;
+        document.getElementById('msg-textarea').value = '';
+        document.getElementById('msg-overlay').classList.add('open');
+    }
+    function closeMsgPopup(e) {
+        if (e && e.target !== document.getElementById('msg-overlay')) return;
+        closeMsg();
+    }
+    function closeMsg() {
+        document.getElementById('msg-overlay').classList.remove('open');
+        msgTargetId = null;
+    }
+    function sendMsg() {
+        var txt = document.getElementById('msg-textarea').value.trim();
+        if (!txt) return;
+        closeMsg();
+        // In a real app you'd send the message via API
+    }
+
+    function goTo(n) {
+        if (n === 4 && !paid) return;
+        if (n > cur && n === 3) renderSummary();
+        cur = n;
+        var shell = document.querySelector('.shell');
+        if (n === 1 && document.getElementById('match-table-view').classList.contains('active')) {
+            shell.style.maxWidth = '860px';
+        } else {
+            shell.style.maxWidth = '540px';
+        }
+        renderTrack();
+        document.querySelectorAll('.stage').forEach(function (s, i) { s.style.display = i === n ? 'block' : 'none'; });
+        if (n === 4) { paid = true; renderTrack(); animProg(); renderWsMsList(); }
+    }
+
+    function renderTrack() {
+        var t = document.getElementById('step-track');
+        t.innerHTML = '';
+        STEPS.forEach(function (lbl, i) {
+            var item = document.createElement('div');
+            item.className = 'step-item';
+            var isDone = (i < cur) || (i === 4 && paid);
+            var isActive = i === cur;
+            if (isDone) item.classList.add('sdone');
+
+            var dot = document.createElement('div');
+            dot.className = 'step-dot ' + (isDone ? 'done' : isActive ? 'active' : (i === 4 && !paid) ? 'locked' : 'idle');
+            if (isDone) {
+                dot.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg>';
+            } else {
+                dot.textContent = i + 1;
+            }
+            if (isDone || isActive) {
+                (function (idx) { dot.style.cursor = 'pointer'; dot.addEventListener('click', function () { goTo(idx); }); })(i);
+            }
+
+            var lbl_el = document.createElement('span');
+            lbl_el.className = 'step-lbl ' + (isDone || isActive ? 'done' : '');
+            lbl_el.textContent = lbl;
+
+            item.appendChild(dot);
+            item.appendChild(lbl_el);
+            t.appendChild(item);
+        });
+    }
+
+    function totalPct() {
+        return milestones.reduce(function (s, m) { return s + (parseInt(m.pct) || 0); }, 0);
+    }
+
+    function renderMilestones() {
+        var list = document.getElementById('ms-list');
+        list.innerHTML = '';
+        milestones.forEach(function (m, idx) {
+            var card = document.createElement('div');
+            card.className = 'ms-card';
+            var pctVal = parseInt(m.pct) || 0;
+            var amtVal = Math.round(TOTAL * pctVal / 100);
+            card.innerHTML =
+                '<div class="ms-card-head">' +
+                '<div class="ms-num">' + (idx + 1) + '</div>' +
+                '<button class="ms-del" onclick="delMilestone(' + m.id + ')" title="Remove"><svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3" y1="3" x2="10" y2="10"/><line x1="10" y1="3" x2="3" y2="10"/></svg></button>' +
+                '</div>' +
+                '<div class="ms-fields">' +
+                '<div class="ms-name-wrap">' +
+                '<span class="flbl">Milestone name</span>' +
+                '<input class="finput" type="text" value="' + m.name + '" placeholder="e.g. Initial concepts" oninput="updateName(' + m.id + ', this.value)">' +
+                '</div>' +
+                '<div class="ms-pct-wrap">' +
+                '<span class="flbl">Percentage</span>' +
+                '<div class="pct-input-wrap">' +
+                '<input class="finput" type="number" min="1" max="100" value="' + pctVal + '" oninput="updatePct(' + m.id + ', this.value)">' +
+                '<span class="pct-suffix">%</span>' +
+                '</div>' +
+                '<div class="ms-amount">= <span>&#8377;' + amtVal.toLocaleString('en-IN') + '</span></div>' +
+                '</div>' +
+                '</div>';
+            list.appendChild(card);
+        });
+        renderAllocBar();
+        renderValidation();
+    }
+
+    function renderAllocBar() {
+        var bar = document.getElementById('alloc-bar');
+        var legend = document.getElementById('alloc-legend');
+        bar.innerHTML = '';
+        legend.innerHTML = '';
+        var used = 0;
+        milestones.forEach(function (m, i) {
+            var p = parseInt(m.pct) || 0;
+            used += p;
+            if (p <= 0) return;
+            var seg = document.createElement('div');
+            seg.className = 'alloc-seg';
+            seg.style.width = Math.min(p, 100) + '%';
+            seg.style.background = SEG_COLORS[i % SEG_COLORS.length];
+            bar.appendChild(seg);
+            var item = document.createElement('div');
+            item.className = 'alloc-item';
+            item.innerHTML = '<div class="alloc-dot" style="background:' + SEG_COLORS[i % SEG_COLORS.length] + '"></div>' + m.name + ' (' + p + '%)';
+            legend.appendChild(item);
+        });
+        var rem = 100 - Math.min(used, 100);
+        if (rem > 0) {
+            var seg2 = document.createElement('div');
+            seg2.className = 'alloc-seg';
+            seg2.style.width = rem + '%';
+            seg2.style.background = 'rgba(81,86,132,0.08)';
+            bar.appendChild(seg2);
+        }
+        var remEl = document.getElementById('ms-remain-val');
+        remEl.textContent = used + '% allocated';
+        var remText = document.getElementById('ms-remain-text');
+        if (used === 100) { remText.textContent = 'All 100% allocated'; remText.className = 'ms-remain ok'; }
+        else if (used > 100) { remText.textContent = 'Over by ' + (used - 100) + '% — reduce to continue'; remText.className = 'ms-remain warn'; }
+        else { remText.textContent = (100 - used) + '% remaining to allocate'; remText.className = 'ms-remain'; }
+    }
+
+    function renderValidation() {
+        var t = totalPct();
+        var el = document.getElementById('ms-validate');
+        var btn = document.getElementById('ms-next-btn');
+        var addBtn = document.getElementById('add-ms-btn');
+        if (milestones.length === 0) {
+            el.style.display = 'flex';
+            el.className = 'ms-validate warn';
+            el.innerHTML = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="6"/><line x1="7" y1="4" x2="7" y2="7.5"/><circle cx="7" cy="9.5" r="0.7" fill="currentColor"/></svg> Add at least one milestone to continue.';
+            btn.disabled = true;
+        } else if (t === 100) {
+            el.style.display = 'flex';
+            el.className = 'ms-validate ok';
+            el.innerHTML = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="6"/><polyline points="4,7 6,9 10,5"/></svg> All 100% allocated across ' + milestones.length + ' milestone' + (milestones.length > 1 ? 's' : '') + '. Ready to continue.';
+            btn.disabled = false;
+        } else if (t > 100) {
+            el.style.display = 'flex';
+            el.className = 'ms-validate warn';
+            el.innerHTML = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="6"/><line x1="7" y1="4" x2="7" y2="7.5"/><circle cx="7" cy="9.5" r="0.7" fill="currentColor"/></svg> Total is ' + t + '%. Reduce by ' + (t - 100) + '% to continue.';
+            btn.disabled = true;
+        } else {
+            el.style.display = 'flex';
+            el.className = 'ms-validate warn';
+            el.innerHTML = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="6"/><line x1="7" y1="4" x2="7" y2="7.5"/><circle cx="7" cy="9.5" r="0.7" fill="currentColor"/></svg> ' + (100 - t) + '% unallocated. Adjust percentages to reach exactly 100%.';
+            btn.disabled = true;
+        }
+        addBtn.style.display = milestones.length >= 5 ? 'none' : 'flex';
+    }
+
+    function addMilestone() {
+        if (milestones.length >= 5) return;
+        milestones.push({ id: nextId++, name: 'Milestone ' + (milestones.length + 1), pct: 0 });
+        renderMilestones();
+    }
+
+    function delMilestone(id) {
+        milestones = milestones.filter(function (m) { return m.id !== id; });
+        renderMilestones();
+    }
+
+    function updateName(id, val) {
+        var m = milestones.find(function (m) { return m.id === id; });
+        if (m) m.name = val;
+        renderAllocBar();
+    }
+
+    function updatePct(id, val) {
+        var m = milestones.find(function (m) { return m.id === id; });
+        if (m) {
+            m.pct = val === '' ? 0 : parseInt(val) || 0;
+            var card = document.querySelectorAll('.ms-card')[milestones.indexOf(m)];
+            if (card) {
+                var amtEl = card.querySelector('.ms-amount span');
+                if (amtEl) amtEl.textContent = '&#8377;' + Math.round(TOTAL * m.pct / 100).toLocaleString('en-IN');
+            }
+        }
+        renderAllocBar();
+        renderValidation();
+    }
+
+    function renderSummary() {
+        var list = document.getElementById('ms-summary-list');
+        list.innerHTML = '';
+        milestones.forEach(function (m, i) {
+            var row = document.createElement('div');
+            row.className = 'ms-sum-row';
+            var amt = Math.round(TOTAL * m.pct / 100);
+            row.innerHTML =
+                '<div class="ms-sum-dot" style="background:' + SEG_COLORS[i % SEG_COLORS.length] + '"></div>' +
+                '<span class="ms-sum-name">' + m.name + '</span>' +
+                '<span class="ms-sum-pct">' + m.pct + '%&nbsp;&nbsp;</span>' +
+                '<span class="ms-sum-amt">&#8377;' + amt.toLocaleString('en-IN') + '</span>';
+            list.appendChild(row);
+        });
+    }
+
+    function renderWsMsList() {
+        var list = document.getElementById('ws-ms-list');
+        list.innerHTML = '';
+        milestones.forEach(function (m, i) {
+            var amt = Math.round(TOTAL * m.pct / 100);
+            var row = document.createElement('div');
+            row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--p-surface);border-radius:8px;margin-bottom:6px;';
+            row.innerHTML =
+                '<div style="width:8px;height:8px;border-radius:2px;background:' + SEG_COLORS[i % SEG_COLORS.length] + ';flex-shrink:0;"></div>' +
+                '<span style="font-size:12px;color:var(--p-dark);flex:1;">' + m.name + '</span>' +
+                '<span style="font-size:11px;background:var(--p-pale);color:var(--p-royal);padding:3px 8px;border-radius:20px;font-size:10px;font-weight:500;">In escrow</span>' +
+                '<span style="font-family:\'DM Mono\',monospace;font-size:12px;font-weight:500;color:var(--p-royal);margin-left:8px;">&#8377;' + amt.toLocaleString('en-IN') + '</span>';
+            list.appendChild(row);
+        });
+    }
+
+    function selMethod(el, showCard, type) {
+        document.querySelectorAll('.mopt').forEach(function (o) { o.classList.remove('sel'); });
+        el.classList.add('sel');
+        ['card', 'upi', 'net', 'wallet'].forEach(function (k) {
+            document.getElementById('fields-' + k).style.display = 'none';
+        });
+        if (showCard) document.getElementById('fields-card').style.display = 'block';
+        else if (type) document.getElementById('fields-' + type).style.display = 'block';
+    }
+
+    function fmtCard(el) { var v = el.value.replace(/\D/g, '').slice(0, 16); el.value = v.replace(/(.{4})/g, '$1  ').trim(); }
+    function fmtExpiry(el) { var v = el.value.replace(/\D/g, '').slice(0, 4); if (v.length >= 3) v = v.slice(0, 2) + ' / ' + v.slice(2); el.value = v; }
+
+    function handlePay() {
+        var btn = document.getElementById('pay-btn');
+        btn.className = 'pay-btn processing';
+        btn.innerHTML = 'Processing payment...';
+        setTimeout(function () { paid = true; goTo(4); }, 1800);
+    }
+
+    function animProg() {
+        var bar = document.getElementById('prog-bar');
+        var pct = document.getElementById('prog-pct');
+        if (!bar) return;
+        var n = 0, target = 8;
+        var iv = setInterval(function () {
+            n++;
+            bar.style.width = n + '%';
+            pct.textContent = n + '%';
+            if (n >= target) clearInterval(iv);
+        }, 50);
+    }
+
+    renderTrack();
+    renderMilestones();
+    initMatchTable();
+    var shell = document.querySelector('.shell');
+    if (cur === 1 && document.getElementById('match-table-view').classList.contains('active')) {
+        shell.style.maxWidth = '860px';
+    } else {
+        shell.style.maxWidth = '540px';
+    }
+    document.querySelectorAll('.stage').forEach(function (s, i) { s.style.display = i === cur ? 'block' : 'none'; });
+</script>
